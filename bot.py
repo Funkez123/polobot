@@ -5,7 +5,7 @@ from time import time, sleep
 from pushbullet import Pushbullet
 import hashlib
 import hmac
-from poloniex import Poloniex
+
 import poloniex
 
 puburl = 'https://poloniex.com/public?command=returnTicker'
@@ -14,10 +14,13 @@ lowest_ask = 0
 highest_bid = 0
 balance_XRP = 0
 balance_USDT = 0
-Key = 'G67353F1-COBNCY7Z-MLN7LVN3-1LQ0U2PX'
-Secret='69ff7fad0e0786e99dda4ce4d9cbe9526a7e7eaa819fc51950ce516cb73a0f754598eb67432635bc9e2fed7f327a49f8f0c68bcf39e77bd47f1d66d6d2cadbf0'
 
-polo = poloniex.Poloniex(key=Key, secret=Secret)
+priurl = 'https://poloniex.com/tradingApi'
+
+apikey = 'G67353F1-COBNCY7Z-MLN7LVN3-1LQ0U2PX'
+apisecret='69ff7fad0e0786e99dda4ce4d9cbe9526a7e7eaa819fc51950ce516cb73a0f754598eb67432635bc9e2fed7f327a49f8f0c68bcf39e77bd47f1d66d6d2cadbf0'
+
+polo = poloniex.Poloniex(key=apikey, secret=apisecret)
 
 API_KEY = "o.ezhuUGocJYE3hBhrbo3tPFkIL38XCa8p"
 pb = Pushbullet(API_KEY)
@@ -138,7 +141,6 @@ def buy_check():
     bullmarket = bull_check()
 
 
-
 def buy():
     print("buy")
     pb.push_note('XRP', 'buy')
@@ -148,11 +150,11 @@ def sell():
     pb.push_note('XRP', 'sell')
 
 def polobuy():
-    ordernum = polo.buy(currencyPair='USDT_XRP',rate=(lowest_ask-(lowest_ask*0.001)),amount=round(1.3/cur_value))
+    ordernum = polo.buy(currencyPair='USDT_XRP',rate=(lowest_ask),amount=round(1.3/cur_value))
     pb.push_note('XRP', 'gekauft')
 
 def polosell():
-    ordernum = polo.sell(currencyPair='USDT_XRP',rate=(highest_bid+(highest_bid*0.001)),amount=balance_XRP)
+    ordernum = polo.sell(currencyPair='USDT_XRP',rate=(highest_bid),amount=balance_XRP)
     pb.push_note('XRP', 'verkauft')
 def balance_check():
     balance = polo.returnBalances()
@@ -169,8 +171,11 @@ def balance_check():
     print('total value of XRP: ' + str(bal*cur_value))
     print('________________________')
 
+i = 0
+
 while True:
-    sleep(60*2 - time() % 60*2)
+
+    sleep(60*15 - time() % 60*15)
 	# thing to run
 
     balance_check()
@@ -182,6 +187,8 @@ while True:
     cal_avr()  ## calculate averages
 
     buy_check()  ##buycheck
+    print('NR:'+str(i))
+    i=i+1
     print('Iteration done')
     print('______')
     print('')
