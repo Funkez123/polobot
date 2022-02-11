@@ -120,12 +120,12 @@ def bull_check():
 
 def buy_check():
     global bullmarket
-    print(__________)
+    print('__________')
     if bull_check() == 1:
         print('Bullmarket')
     else:
         print('Bearmarket')
-    print(__________)
+    print('__________')
 
     if bull_check() != bullmarket:
 
