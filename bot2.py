@@ -17,14 +17,14 @@ balance_XRP = 0
 balance_USDT = 0
 
 matpl = 0
-active = 0
+active = 1
 pull_interval = 60*15
 
 
 priurl = 'https://poloniex.com/tradingApi'
 
-apikey = 'G67353F1-COBNCY7Z-MLN7LVN3-1LQ0XXXX'
-apisecret='69ff7fad0e0786e99dda4ce4d9cbe9526a7e7eaa819fc51950ce516cb73a0f754598eb67432635bc9e2fed7f327a49f8f0c68bcf39e77bd47f1d66d6d2cadXXX'
+apikey = 'G67353F1-COBNCY7Z-MLN7LVN3-1LQ0U2PX'
+apisecret='69ff7fad0e0786e99dda4ce4d9cbe9526a7e7eaa819fc51950ce516cb73a0f754598eb67432635bc9e2fed7f327a49f8f0c68bcf39e77bd47f1d66d6d2cadbf0'
 
 polo = poloniex.Poloniex(key=apikey, secret=apisecret)
 
@@ -107,8 +107,6 @@ def cal_avr():
 
     # ma10 ###
     ma_sum = 0;
-    print("size:")
-    print(ma10_ar.size)
     for i in range(ma10_ar.size):
         ma_sum = ma_sum + price_his[price_his.size-1-ma10_ar.size+i]
 
@@ -160,8 +158,9 @@ def cal_avr():
     exma_his = exma_his_buf
     exma_his[95] = exma
 
-
     ##############
+
+    print('MA:'+str(ma10)+' | ' + 'EXMA:'+str(exma))
 
 def bull_check():
     global exma
@@ -194,9 +193,13 @@ def buy_check():
 
 def buy():
     print("buy")
-    pb.push_note('XRP', 'buy XRP at' + str(cur_value))
+    pb.push_note('TradeBot', 'buy XRP at' + str(cur_value))
     if active == 1:
-        polobuy()
+        if (float(balance['USDT']) > 1):
+            polobuy()
+        else:
+            pb.push_note('TradeBot', 'Not enough USDT to fullfill purchase')
+
     else:
         print("not bought for test reason")
 
@@ -204,7 +207,12 @@ def sell():
     print("sell nigga")
     pb.push_note('XRP', 'sell XRP at' + str(cur_value))
     if active == 1:
-        polosell()
+
+        if (float(balance['XRP'])*cur_value > 0.8):
+            polosell()
+        else:
+            pb.push_note('TradeBot', 'Not enough XRP to sell')
+
     else:
         print("not bought for test reason")
 
@@ -254,9 +262,7 @@ while True:
     i=i+1
     print('Iteration done')
     print('________________________________________________')
-    print('')
-    print('')
-    print('')
+
 
     if i%10 == 0:
         if matpl == 1:
