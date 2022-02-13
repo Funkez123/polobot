@@ -9,18 +9,22 @@ import hmac
 import os
 import poloniex
 
-puburl = 'https://poloniex.com/public?command=returnTicker'
-cur_value = 0
-lowest_ask = 0
-highest_bid = 0
-balance_XRP = 0
-balance_USDT = 0
-
 matpl = 0
 active = 1
 pull_interval = 60*15
 
 
+# buffer variables
+cur_value = 0
+lowest_ask = 0
+highest_bid = 0
+balance_XRP = 0
+balance_USDT = 0
+bullmarket = 1
+warmup = 1
+
+#Poloniex Initialization
+puburl = 'https://poloniex.com/public?command=returnTicker'
 priurl = 'https://poloniex.com/tradingApi'
 
 apikey = 'G67353F1-COBNCY7Z-MLN7LVN3-1LQ0U2PX'
@@ -28,10 +32,12 @@ apisecret='69ff7fad0e0786e99dda4ce4d9cbe9526a7e7eaa819fc51950ce516cb73a0f754598e
 
 polo = poloniex.Poloniex(key=apikey, secret=apisecret)
 
+
+#Pushbullet
 API_KEY = "o.ezhuUGocJYE3hBhrbo3tPFkIL38XCa8p"
 pb = Pushbullet(API_KEY)
 
-bullmarket = 1
+
 
 price_his = np.array(96)
 price_buffer = np.array(96)
@@ -195,26 +201,27 @@ def buy():
     print("buy")
     pb.push_note('TradeBot', 'buy XRP at' + str(cur_value))
     if active == 1:
-        if (balance_USDT > 1):
-            polobuy()
-        else:
-            pb.push_note('TradeBot', 'Not enough USDT to fullfill purchase')
+        if warmup == 0:
+            if (balance_USDT > 1):
+                polobuy()
+            else:
+                pb.push_note('TradeBot', 'Not enough USDT to fullfill purchase')
 
     else:
-        print("not bought for test reason")
+            print("not bought for test reason")
 
 def sell():
     print("sell nigga")
     pb.push_note('XRP', 'sell XRP at' + str(cur_value))
     if active == 1:
-
-        if (balance_XRP*cur_value > 0.8):
-            polosell()
-        else:
-            pb.push_note('TradeBot', 'Not enough XRP to sell')
+        if warmup == 0:
+            if (balance_XRP*cur_value > 0.8):
+                polosell()
+            else:
+                pb.push_note('TradeBot', 'Not enough XRP to sell')
 
     else:
-        print("not bought for test reason")
+            print("not bought for test reason")
 
 def polobuy():
     ordernum = polo.buy(currencyPair='USDT_XRP',rate=(lowest_ask),amount=round(1.3/cur_value))
@@ -240,35 +247,48 @@ def balance_check():
     print('________________________________________________')
     print('')
 
-def main_runthrough():
-    balance_check()
-    pull_cur_data()
+
+i = 1
+def warmup_check():
+    global i
+    print('________________________________________________')
+    if warmup == 1:
+
+        print('### WarmUp-Mode ###')
+        print('due to MA.size < Iteration-NR')
+    else:
+        print('### Active-Trading Mode ###')
 
     print('________________________________________________')
+
+
+def main_runthrough():
+    global i
+    balance_check()
+    pull_cur_data()
+    print('________________________________________________')
     ref_arr() #refresh arrays
-
     cal_avr()  ## calculate averages
-
     buy_check()  ##buycheck
+    warmup_check()
     print('NR:'+str(i))
     i=i+1
     print('Iteration done')
     print('________________________________________________')
 
 
-i = 1
-
 print('Running first Iteration:')
 main_runthrough()
 
 while True:
-
     sleep(pull_interval - time() % pull_interval)
 	# thing to run
     clear = lambda: os.system('clear')
     clear()
 
     main_runthrough()
+    if i > ma10.size:
+        warmup = 0
 
 """
     if i%10 == 0:
