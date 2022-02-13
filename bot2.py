@@ -240,15 +240,7 @@ def balance_check():
     print('________________________________________________')
     print('')
 
-i = 1
-
-while True:
-
-    sleep(pull_interval - time() % pull_interval)
-	# thing to run
-    clear = lambda: os.system('clear')
-    clear()
-
+def main_runthrough():
     balance_check()
     pull_cur_data()
 
@@ -262,6 +254,21 @@ while True:
     i=i+1
     print('Iteration done')
     print('________________________________________________')
+
+
+i = 1
+
+print('Running first Iteration:')
+main_runthrough()
+
+while True:
+
+    sleep(pull_interval - time() % pull_interval)
+	# thing to run
+    clear = lambda: os.system('clear')
+    clear()
+
+    main_runthrough()
 
 """
     if i%10 == 0:
