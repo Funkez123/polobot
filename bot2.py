@@ -5,7 +5,7 @@ from time import time, sleep
 from pushbullet import Pushbullet
 import hashlib
 import hmac
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import os
 import poloniex
 
@@ -195,7 +195,7 @@ def buy():
     print("buy")
     pb.push_note('TradeBot', 'buy XRP at' + str(cur_value))
     if active == 1:
-        if (float(balance['USDT']) > 1):
+        if (balance_USDT > 1):
             polobuy()
         else:
             pb.push_note('TradeBot', 'Not enough USDT to fullfill purchase')
@@ -208,7 +208,7 @@ def sell():
     pb.push_note('XRP', 'sell XRP at' + str(cur_value))
     if active == 1:
 
-        if (float(balance['XRP'])*cur_value > 0.8):
+        if (balance_XRP*cur_value > 0.8):
             polosell()
         else:
             pb.push_note('TradeBot', 'Not enough XRP to sell')
@@ -263,7 +263,7 @@ while True:
     print('Iteration done')
     print('________________________________________________')
 
-
+"""
     if i%10 == 0:
         if matpl == 1:
             t = np.arange(0, 96, 1)
@@ -272,3 +272,4 @@ while True:
             plt.plot(t,exma_his,color="orange")
 
             plt.show()
+"""
