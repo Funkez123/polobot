@@ -210,9 +210,9 @@ def buy_check():
         if bull_check() == 1:
             buy()
         else:
-            if (lowestAsk >= profit_thresh):  # Wenn safe-profit erreicht wurde
+            if (lowest_ask >= profit_thresh):  # Wenn safe-profit erreicht wurde
                 sell()
-            if (highestBid < stop_loss):  # Wenn stoploss unterschritten wird
+            if (highest_bid < stop_loss):  # Wenn stoploss unterschritten wird
                 sell()
 
     bullmarket = bull_check()
