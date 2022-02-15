@@ -5,16 +5,14 @@ from time import time, sleep
 from pushbullet import Pushbullet
 import hashlib
 import hmac
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 import os
 import poloniex
 
 
-matpl = 0
+matpl = 1
 active = 1
-pull_interval = 60*5
-
-currency = "XRP_BULL"
+pull_interval = 60*2
 
 # buffer variables
 cur_value = 0
@@ -90,8 +88,8 @@ long_exma = 0
 
 stop_loss = 0
 profit_thresh = 0
-profit_percent = 2
-stop_loss_percent = 0.7
+profit_percent = 1
+stop_loss_percent = 0.5
 bought_value = 0
 
 def pull_cur_data():
@@ -102,10 +100,10 @@ def pull_cur_data():
     binary = r.content
     result = json.loads(binary)
     #print("ID:"+ str(result["USDT_XRP"]["id"]))
-    cur_value=float(result["USDT_XRPBULL"]["last"])
-    print("Exchange-Rate USDT_XRPBULL:"+str(cur_value))
-    lowest_ask=float(result["USDT_XRPBULL"]["lowestAsk"])
-    highest_bid=float(result["USDT_XRPBULL"]["highestBid"])
+    cur_value=float(result["USDT_XRP"]["last"])
+    print("Exchange-Rate USDT_XRP:"+str(cur_value))
+    lowest_ask=float(result["USDT_XRP"]["lowestAsk"])
+    highest_bid=float(result["USDT_XRP"]["highestBid"])
 
 
 def ref_arr():
@@ -198,10 +196,14 @@ def buy_check():
     global bullmarket
     print('________________________________________________')
     if bull_check() == 1:
-        print('Bullmarket')
+        print('Uptrend')
     else:
-        print('Bearmarket')
+        print('Downtrend')
     print('________________________________________________')
+
+    print(" last bought at : " + str(bought_value))
+    print(" Sells at: " + str(profit_thresh))
+    print(" Stoploss at : "+ str(stop_loss))
 
     if bull_check() != bullmarket:
 
@@ -210,17 +212,18 @@ def buy_check():
         if bull_check() == 1:
             buy()
         else:
-            if (lowest_ask >= profit_thresh):  # Wenn safe-profit erreicht wurde
-                sell()
-            if (highest_bid < stop_loss):  # Wenn stoploss unterschritten wird
-                sell()
+            sell()
+        if (lowest_ask >= profit_thresh):  # Wenn safe-profit erreicht wurde
+            sell()
+        if (highest_bid < stop_loss):  # Wenn stoploss unterschritten wird
+            sell()
 
     bullmarket = bull_check()
 
 
 def buy():
     print("buy")
-    pb.push_note('TradeBot', 'buy XRPBULL at:' + str(cur_value))
+    pb.push_note('TradeBot', 'buy XRP at:' + str(cur_value))
     if active == 1:
         if warmup == 0:
             if (balance_USDT > 1):
@@ -232,8 +235,8 @@ def buy():
                 global stop_loss_percent
 
                 bought_value = lowest_ask
-                profit_thresh = lowest_ask*(1+100/profit_percent)
-                stop_loss = lowest_ask*(1-100/stop_loss_percent)
+                profit_thresh = lowest_ask*(1+profit_percent/100)
+                stop_loss = lowest_ask*(1-stop_loss_percent/100)
 
             else:
                 pb.push_note('TradeBot', 'Not enough USDT to fullfill purchase')
@@ -243,7 +246,7 @@ def buy():
 
 def sell():
     print("sell nigga")
-    pb.push_note('XRPBULL', 'sell XRPBULL at' + str(cur_value))
+    pb.push_note('XRP', 'sell XRP at' + str(cur_value))
     if active == 1:
         if warmup == 0:
             if (balance_XRP*cur_value > 0.8):
@@ -258,7 +261,7 @@ def sell():
                 bought_value = 0
                 stop_loss = 0
                 profit_thresh = 0
-                pb.push_note('XRPBULL', 'sell XRPBULL at' + str(profit_after_sold))
+                pb.push_note('XRP', 'sell XRP at' + str(profit_after_sold))
 
 
             else:
@@ -269,25 +272,25 @@ def sell():
             print("not bought for test reason")
 
 def polobuy():
-    ordernum = polo.buy(currencyPair='USDT_XRPBULL',rate=(lowest_ask),amount=round(1.3/cur_value))
-    pb.push_note('XRPBULL', 'gekauft')
+    ordernum = polo.buy(currencyPair='USDT_XRP',rate=(lowest_ask),amount=round(1.3/cur_value))
+    pb.push_note('XRP', 'gekauft')
 
 def polosell():
-    ordernum = polo.sell(currencyPair='USDT_XRPBULL',rate=(highest_bid),amount=balance_XRP)
-    pb.push_note('XRPBULL', 'verkauft')
+    ordernum = polo.sell(currencyPair='USDT_XRP',rate=(highest_bid),amount=balance_XRP)
+    pb.push_note('XRP', 'verkauft')
 
 def balance_check():
     balance = polo.returnBalances()
     print('________________________________________________')
     print("Balance")
-    print("XRPBULL:" + str(balance['XRPBULL']))
+    print("XRP:" + str(balance['XRP']))
     global balance_XRP
-    balance_XRP = float(balance['XRPBULL'])
+    balance_XRP = float(balance['XRP'])
     print("USDT:"+str(balance['USDT']))
     global balance_USDT
     balance_USDT = float(balance['USDT'])
     print('')
-    bal = float(balance['XRPBULL'])
+    bal = float(balance['XRP'])
     print('available XRP balance value in USDT: ' + str(bal*cur_value))
     print('________________________________________________')
     print('')
@@ -335,7 +338,7 @@ while True:
     if i > ma10_ar.size:
         warmup = 0
 
-"""
+
     if i%10 == 0:
         if matpl == 1:
             t = np.arange(0, 96, 1)
@@ -343,5 +346,5 @@ while True:
             plt.plot(t,ma10_his,color="red")
             plt.plot(t,exma_his,color="orange")
 
-            plt.show()
-"""
+            plt.savefig('graph.png')
+            plt.close()
